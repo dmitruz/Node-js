@@ -1,53 +1,29 @@
 //npm start run dev  for launching project
 
-const { listContacts, getContactById, removeContact, addContact } = require('./contacts');
+const fs = require('fs').promises;
+const path = require('path');
+const uuid = require('uuid');
 
-const { Command } = require('commander');
-const program = new Command();
-program
-  .option('-a, --action <type>', 'choose action')
-  .option('-i, --id <type>', 'user id')
-  .option('-n, --name <type>', 'user name')
-  .option('-e, --email <type>', 'user email')
-  .option('-p, --phone <type>', 'user phone');
+const productPath = path.join(__dirname, "products.json");
 
-program.parse(process.argv);
+const getAll = async() => {
+  const dataString = await fs.readFile(productPath, 'utf8');
+  const data = JSON.parse(dataString);
+  return data;
+}
 
-(async () => {
-  const argv = program.opts();
+const getById = async (id) => {
+  const allProducts = await getAll();
+  const product = allProducts.find(product => product.id === id);
+  return product ? product : null;
+}
 
-  async function invokeAction({ action, id, name, email, phone }) {
-    switch (action) {
-      case 'list': {
-        const data = await listContacts();
-        console.table(data);
-        break;
-      }
-
-      case 'get': {
-        const data = await getContactById(id);
-        console.table(data);
-        break;
-      }
-
-      case 'add': {
-        await addContact(name, email, phone);
-        const data = await listContacts();
-        console.table(data);
-        break;
-      }
-
-      case 'remove': {
-        await removeContact(id);
-        const data = await listContacts();
-        console.table(data);
-        break;
-      }
-
-      default:
-        console.warn('\x1B[31m Unknown action type!');
-    }
+const create = async (price, name) => {
+  const newProduct = {
+    id: uuid.v4(),
+    price: price,
+    name: name,
   }
 
-  await invokeAction(argv);
-})();
+  
+}
